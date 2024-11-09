@@ -10,7 +10,7 @@ data_ref#_
     guarantor:MsgAddressInt
     = DataRef;
 
-escrow_data#_
+contract_data#_
     data:^DataRef
     jetton:MsgAddressInt
     amount:Coins
@@ -18,7 +18,7 @@ escrow_data#_
     = EscrowData;
 
 
-deploy#1 data:EscrowData = InMsgBody;
+deploy#1 data:^EscrowData = InMsgBody;
 
 withdraw#cb03bfaf = InMsgBody;
 refund#c135f40c = InMsgBody;
