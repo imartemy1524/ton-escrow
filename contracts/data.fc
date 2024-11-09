@@ -1,0 +1,73 @@
+#include "imports/stdlib.fc";
+#include "const.fc";
+;; storage variables
+global slice investor;
+global slice worker;
+global slice guarantor;
+;; may be address or 00 if tons
+global slice jetton;
+;; amount of tons/jetton to be sent to guarantor
+global int guarantorInterest;
+;; amount of tons/jetton to be sent to worker/refunded to investor
+global int amount;
+
+
+() load_data() impure {
+    var ds = get_data().begin_parse();
+    throw_unless(error::not_deployed, ds~load_bool()); ;; not yet deployed
+    throw_if(error::contract_closed, ds~load_bool()); ;; thows if contract is finished
+    {
+        var ref = ds~load_ref().begin_parse();
+        investor = ref~load_msg_addr();
+        worker = ref~load_msg_addr();
+        guarantor = ref~load_msg_addr();
+        ref.end_parse();
+    }
+    jetton = ds~load_msg_addr();
+    amount = ds~load_coins();
+    guarantorInterest = ds~load_coins();
+
+    ds.end_parse();
+}
+
+;; the only thing that can be changed is finished to 1, thus, one can just optimize the fees using next function
+() set_finished() impure inline {
+    ;; slice data = get_data().begin_parse();
+    set_data(
+        begin_cell()
+            .store_uint(3, 2) ;; - finished, already deployed
+            ;; .store_ref(data~load_ref())
+            ;; .store_slice(data)
+            .end_cell()
+    );
+}
+
+
+() require_withdraw(slice sender) impure inline {
+    throw_unless(error::no_permission, equal_slices_bits(sender, investor) | equal_slices_bits(sender, guarantor));
+}
+
+() require_refund(slice sender) impure inline {
+    throw_unless(error::no_permission, equal_slices_bits(sender, worker) | equal_slices_bits(sender, guarantor));
+}
+
+
+(slice, slice, slice, slice, int, int) data() method_id {
+    load_data();
+    return (
+        investor,
+        worker,
+        guarantor,
+        jetton,
+        amount,
+        guarantorInterest
+    );
+}
+(int) finished() method_id {
+    slice data = get_data().begin_parse();
+    data~skip_bits(1);
+    return (data~load_uint(1));
+}
+
+
+

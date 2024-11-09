@@ -1,0 +1,22 @@
+const error::already_deployed = 706;
+const error::no_permission = 705;
+const error::contract_closed = 710;
+const error::not_deployed = 711;
+
+
+const op::deploy = 0x1;
+const op::withdraw = "op::withdraw"c;
+const op::refund = "op::refund"c;
+const op::jetton::transfer = 0x0f8a7ea5;
+
+
+
+
+
+const fees::jetton::send = 50000000; ;; 0.05 TON
+const fees::compute =  10000000; ;; 0.01 TON
+const message::interest = "work interest"u;
+const message::work = "work done"u;
+const message::work::length = 9 * 8;
+const message::interest::length = 13 * 8;
+

@@ -1,0 +1,60 @@
+#include "data.fc";
+#include "imports/stdlib.fc";
+
+
+() send_tons_to(slice to, int amount, int message, int length) impure {
+    cell msg2sender = begin_cell()
+        .store_uint(0x18, 6)
+        .store_slice(to)
+        .store_coins(amount)
+        .store_uint(message, 1 + 4 + 4 + 64 + 32 + 1 + 1 + (32 + length)) ;; 32 bits empty (comment padding) and length - length of comment
+        .end_cell();
+    send_raw_message(msg2sender, 16 | 1);
+}
+() send_jettons_to(slice to, slice excess, int amount, int message, int length) impure {
+    var [value, _] = load_incomming_value();
+    throw_if(719, value > fees::jetton::send * 2 + fees::compute); ;; check if we have enough funds to send
+    send_raw_message(begin_cell()
+        .store_uint(0x18, 6)
+        .store_slice(jetton)
+        .store_coins(fees::jetton::send)
+        .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_ref(begin_cell()
+            .store_uint(op::jetton::transfer << 64, 32 + 64) ;; op code + query id(0)
+            .store_coins(amount) ;; amount
+            .store_slice(to) ;; recipient
+            .store_slice(excess) ;; excess
+            ;; .store_uint(0, 1) ;; maybe<custom_payload>
+            ;; .store_coins(1)  ;; fwd_fee
+            ;; .store_uint(1, 1) ;; forward_payload
+            .store_uint(515, 14) ;; instead 3 top lines use hardcoded constant
+            .store_ref(
+                begin_cell()
+                    .store_uint(message, (length) + 32) ;; comment in maybe<forward_payload>
+                    .end_cell()
+            )
+            .end_cell()
+        )
+        .end_cell(),
+        16 | 1 ;; BounceIfFailed | PayFeesExternal
+    );
+
+}
+
+
+() send_tokens_to(slice to, slice sender) impure inline {
+    if (is_address_none(jetton)) {
+        ;; if address is not initialized, we sending TONS
+        send_tons_to(to, amount, message::work, message::work::length);
+        send_tons_to(guarantor, guarantorInterest, message::interest, message::interest::length);
+    }
+    else {
+        send_jettons_to(to, sender, amount, message::work, message::work::length);
+        send_jettons_to(guarantor, sender, guarantorInterest, message::interest, message::interest::length);
+    }
+
+    ;; close the contract
+    set_finished();
+}
+
+
