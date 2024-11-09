@@ -13,7 +13,7 @@
 }
 () send_jettons_to(slice to, slice excess, int amount, int message, int length) impure {
     var [value, _] = load_incomming_value();
-    throw_if(719, value > fees::jetton::send * 2 + fees::compute); ;; check if we have enough funds to send
+    throw_if(error::not_enough_funds, value > fees::jetton::send * 2 + fees::compute); ;; check if we have enough funds to send
     send_raw_message(begin_cell()
         .store_uint(0x18, 6)
         .store_slice(jetton)

@@ -2,6 +2,7 @@ const error::already_deployed = 706;
 const error::no_permission = 705;
 const error::contract_closed = 710;
 const error::not_deployed = 711;
+const error::not_enough_funds = 712;
 
 
 const op::deploy = 0x1;
