@@ -1,4 +1,3 @@
-nothing$0 {X:Type} = Maybe X;
 anycast_info$_ depth:(#<= 30) { depth >= 1 }
    rewrite_pfx:(bits depth) = Anycast;
 addr_none$00 = MsgAddressExt;
