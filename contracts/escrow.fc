@@ -30,14 +30,13 @@
     slice to = null();
     if (op == op::withdraw) {
         require_withdraw(sender_address);
-        to = worker;
         ;; send_tokens_to(worker, sender_address); ;; send the amount to the sender (if the work is done)
         to = worker;
     }
     elseif (op == op::refund) {
         require_refund(sender_address);
-        to = investor;
         ;; send_tokens_to(investor, sender_address); ;; send the amount to the sender (if the work is not done)
+        to = investor;
     }
     ifnot(null?( to)) {
         send_tokens_to(to, sender_address);

@@ -1,0 +1,25 @@
+nothing$0 {X:Type} = Maybe X;
+anycast_info$_ depth:(#<= 30) { depth >= 1 }
+   rewrite_pfx:(bits depth) = Anycast;
+addr_none$00 = MsgAddressExt;
+addr_std$10 anycast:(Maybe Anycast)
+   workchain_id:int8 address:bits256  = MsgAddressInt;
+data_ref#_
+    investor:MsgAddressInt
+    worker:MsgAddressInt
+    guarantor:MsgAddressInt
+    = DataRef;
+
+escrow_data#_
+    data:^DataRef
+    jetton:MsgAddressInt
+    amount:Coins
+    amount_interest:Coins
+    = EscrowData;
+
+
+deploy#1 data:EscrowData = InMsgBody;
+
+withdraw#cb03bfaf = InMsgBody;
+refund#c135f40c = InMsgBody;
+
